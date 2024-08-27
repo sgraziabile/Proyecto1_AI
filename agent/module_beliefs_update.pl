@@ -32,12 +32,31 @@
 % Esta implementación busca ser un marco para facilitar la resolución del proyecto.
 
 update_beliefs(Perc):-
-
-	% El agente olvida todo lo que recordaba
-	retractall(time(_)),
-	retractall(direction(_)),
-	retractall(at(_, _, _)),
-	retractall(node(_, _, _, _, _)),
-
-	% y recuerda lo que percibió
-	forall(member(Rel, Perc), assert(Rel)).
+%Procesar los nodos que detecta (node)
+forall(
+	member(node(Id,PosX,PosY,Costo,Conexiones),Perc),
+	(
+		retractall(node(Id,_,_,_,_)), %elimino información desactualizada del nodo
+		asserta(node(Id,PosX,PosY,Costo,Conexiones))	%agrego la infomación actualizada del nodo
+	)
+),
+%Procesar las posiciones de las entidades (at)
+forall(
+	member(at(IdNodo,TipoEntidad,IdEntidad),Perc),
+	(
+		retractall(at(IdNodo,_,_)),
+		asserta(at(IdNodo,TipoEntidad,IdEntidad))
+	)
+),
+%Procesar tiempo
+(
+	member(time(T),Perc) 
+	-> retractall(time(_)), asserta(time(T))
+	; true
+),
+%Procesar direccion
+(
+	member(direction(D),Perc)
+	-> retractall(direction(_)), asserta(direction(D))
+	; true
+).
