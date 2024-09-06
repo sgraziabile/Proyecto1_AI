@@ -54,6 +54,63 @@ crearPlan([], []).
 crearPlan(Camino, Plan):-
 	findall(avanzar(Nodo), member(Nodo, Camino), Plan).
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% generarVecinos(+Nodo,-Vecinos)
+%	Encuentra todos los nodos del árbol de búsqueda que
+% representan estados alcanzables desde el estado de Nodo
+% aplicando alguno de los operadores disponibles. 
+%
+
+
+generarVecinos([IdNodo, CostoActual], Vecinos):-
+	% Nodo = [IdNodo, CostoActual],
+	% write(IdNodo), nl,
+	% retractall(node(IdNodo, _, _, _, _)),	
+	% assert(node(a,1,1,1,[[b,1],[d,1],[c,1],[e,1]])),
+	node(IdNodo, _, _, _, Conexiones),
+	findall(
+		[IdVecino, CostoTotal],
+		(
+			member([IdVecino, CostoVecino], Conexiones),
+			CostoTotal is CostoActual + CostoVecino
+		), 
+		Vecinos 
+	).	
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% compararH(+Nodo1, +Nodo2, ?Resultado)
+%
+% Compara dos nodos por el valor de la heurística.
+%
+compararH([_,_,H1], [_,_,H2], Result):- 
+	H1 < H2, Result is -1.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%ordenarPorH(+Lista, -ListaOrdenada)
+%
+% Ordena la lista de nodos por el valor de la heurística.
+%
+ordenarPorH([], []).
+ordenarPorH(VecinosConH, VecinosOrdenados):-
+	predsort(compararH, VecinosConH, VecinosOrdenados).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% agregar(+Frontera, +Vecinos, -NuevaFrontera, +NuevosVisitados, +Padre, +Metas)
+% Agrega los vecinos de Padre a la frontera, siguiendo el algoritmo A*
+%
+agregar(Frontera, Vecinos, NuevaFrontera,Visitados, Padre, Metas):-
+	findall(
+		[Hijo, CostoTotal,H],
+		(
+			member([Hijo, CostoHijo], Vecinos),
+			\+ member([Hijo,_], Visitados),
+			CostoTotal is CostoHijo,
+			calcularH(Hijo, Metas, H)
+		),
+		VecinosSinRep
+	).
+	
+	
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % buscar_plan_desplazamiento(+Metas, -Plan, -Destino, -Costo)

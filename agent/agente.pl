@@ -144,5 +144,4 @@ busqueda_plan(Plan, Destino, Costo):-
  	retractall(plandesplazamiento(_)),
  	retractall(esMeta(_)),
  	findall(Nodo, at(Nodo, copa, _), Metas), % nuevas metas
-
  	buscar_plan_desplazamiento(Metas, Plan, Destino, Costo). % implementado en module_path_finding

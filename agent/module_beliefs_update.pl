@@ -45,6 +45,7 @@ forall(
 	member(at(IdNodo,TipoEntidad,IdEntidad),Perc),
 	(
 		retractall(at(IdNodo,_,_)),
+		retractall(at(_,agente,me)),
 		asserta(at(IdNodo,TipoEntidad,IdEntidad))
 	)
 ),
