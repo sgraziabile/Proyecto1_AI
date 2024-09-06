@@ -31,22 +31,28 @@ generarVecinos([IdNodo, CostoActual], Vecinos):-
 		), 
 		Vecinos 
 	).
-calcular_f(Nodo,Lista, CostoPadre,F, Metas):-
-      member([Nodo, CostoNodo], Lista),
-      G is CostoPadre + CostoHijo,      %g(n) = costo acumulado
-      calcularH(Hijo, Metas, H),        %h(n) = euristica
-      F is G + H.                       %f(n) = g(n) + h(n)
+  calcular_menor_H(Nodo, Metas, MenorH):-
+    findall(
+      H,
+      (
+        member(Meta,Metas),
+        calcularH(Nodo, Meta, H)    %h(n) = heuristica
+      ), 
+      ListaHeuristicas
+    ),
+    min_list(ListaHeuristicas, MenorH).
 
   agregar(Frontera, Vecinos, NuevaFrontera,Visitados, Padre, Metas):-
-    Padre = [_, CostoPadre],
+    Padre = [IdPadre, CostoPadre],
+    calcular_menor_H(IdPadre, Metas, HPadre),
     findall(
       [Hijo, F],
       (
         member([Hijo, CostoHijo], Vecinos),
         \+ member([Hijo,_], Visitados),
-        G is CostoPadre + CostoHijo,      %g(n) = costo acumulado
-        calcularH(Hijo, Metas, H),        %h(n) = euristica
-        F is G + H                        %f(n) = g(n) + h(n)
+        G is (CostoPadre - HPadre) + CostoHijo,      %g(n) = costo acumulado  ES NECESARIO VOLVER A SUMAR?
+        calcular_menor_H(Hijo, Metas, HMeta),    %calculo el menor H de los hijos
+        F is G + HMeta + HPadre                       %f(n) = g(n) + h(n)    
       ),
       VecinosSinRep
     ),
