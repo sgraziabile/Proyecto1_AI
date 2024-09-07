@@ -42,22 +42,69 @@ generarVecinos([IdNodo, CostoActual], Vecinos):-
     ),
     min_list(ListaHeuristicas, MenorH).
 
+  eliminar(_,[],[]).
+  eliminar([X|Xs],X,Xs).
+  eliminar([Y|Ys],X,[Y|Zs]):-eliminar(Ys,X,Zs).
+
+  print_list([]).
+  print_list([X|Xs]):-
+    write(X), nl,
+    print_list(Xs).
+
   agregar(Frontera, Vecinos, NuevaFrontera,Visitados, Padre, Metas):-
     Padre = [IdPadre, CostoPadre],
     calcular_menor_H(IdPadre, Metas, HPadre),
     findall(
       [Hijo, F],
       (
-        member([Hijo, CostoHijo], Vecinos),
-        \+ member([Hijo,_], Visitados),
-        G is (CostoPadre - HPadre) + CostoHijo,      %g(n) = costo acumulado  ES NECESARIO VOLVER A SUMAR?
-        calcular_menor_H(Hijo, Metas, HMeta),    %calculo el menor H de los hijos
-        F is G + HMeta + HPadre                       %f(n) = g(n) + h(n)    
+        member([Hijo, CostoHijo],Vecinos),            %para cada vecino
+        ( %Caso 1: si el hijo esta en la frontera
+          member([Hijo,ViejoF], Frontera),
+          \+ member([Hijo,_], Visitados) ->
+          ( 
+            writeln('Front, NoVisitados'),
+            G is (CostoPadre - HPadre) + CostoHijo,      %g(n) = costo acumulado 
+            calcular_menor_H(Hijo, Metas, HMeta),        %calculo el menor H de los hijos
+            FTemp is G + HMeta + HPadre,                 %f(n) = g(n) + h(n) 
+            FTemp < ViejoF -> (
+              F = FTemp
+              %delete(Frontera,[Hijo,ViejoF],FronteraAux)
+            ); false                                   %si no, lo mantengo igual
+          )                              
+        ; %Caso 2: si el hijo no esta en la frontera
+            \+ member([Hijo,_],Frontera), 
+            \+ member([Hijo,_], Visitados) ->             %si el hijo no esta en visitados
+            (
+              writeln('NoFront, NoVisitados'),
+              G is (CostoPadre - HPadre) + CostoHijo,      %g(n) = costo acumulado  ES NECESARIO VOLVER A SUMAR?
+              calcular_menor_H(Hijo, Metas, HMeta),    %calculo el menor H de los hijos
+              F is G + HMeta + HPadre                       %f(n) = g(n) + h(n)    
+            )
+            ; 
+            \+ member([Hijo,_],Frontera),
+            member([Hijo,ViejoF], Visitados) -> (               %si el hijo esta en visitados
+              writeln('NoFront, Visitados'),
+              G is (CostoPadre - HPadre) + CostoHijo,      %g(n) = costo acumulado 
+              calcular_menor_H(Hijo, Metas, HMeta),        %calculo el menor H de los hijos
+              FTemp is G + HMeta + HPadre,                 %f(n) = g(n) + h(n) 
+              FTemp < ViejoF -> (
+                F = FTemp 
+              ); false
+            )
+          )
       ),
       VecinosSinRep
     ),
-    append(VecinosSinRep, [Frontera], FronteraAux),
-    ordenar_segun_f(FronteraAux, NuevaFrontera).
+    findall(
+      [Nodo,Costo],
+      (
+        member([Nodo,Costo],Frontera),
+        \+ member([Nodo,_],VecinosSinRep)
+      ),
+      FronteraSinEliminados
+    ),
+    append(VecinosSinRep, FronteraSinEliminados, FronteraFinal),
+    ordenar_segun_f(FronteraFinal, NuevaFrontera).
 
   ordenar_segun_f(Frontera, NuevaFrontera):-
     sort(2, @=<, Frontera, NuevaFrontera).    %ordenar Frontera por el segundo elemento. 
