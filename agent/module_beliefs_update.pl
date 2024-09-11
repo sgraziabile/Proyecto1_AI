@@ -36,17 +36,32 @@ update_beliefs(Perc):-
 forall(
 	member(node(Id,PosX,PosY,Costo,Conexiones),Perc),
 	(
-		retractall(node(Id,_,_,_,_)), %elimino información desactualizada del nodo
-		asserta(node(Id,PosX,PosY,Costo,Conexiones))	%agrego la infomación actualizada del nodo
+		retractall(node(Id,_,_,_,_)), 								%elimino información desactualizada del nodo
+		asserta(node(Id,PosX,PosY,Costo,Conexiones)),	%agrego la infomación actualizada del nodo
+		(\+member(at(Id,_,_),Perc) -> retractall(at(Id,_,_)); true) %elimino la entidad del nodo si desapareció
 	)
 ),
 %Procesar las posiciones de las entidades (at)
 forall(
-	member(at(IdNodo,TipoEntidad,IdEntidad),Perc),
+	member(at(IdNodo,TipoEntidad,IdEntidad),Perc), 
 	(
-		retractall(at(IdNodo,_,_)),
-		retractall(at(_,agente,me)),
+	%Caso 1: si el At esta en las creencias y cambio
+	(	at(IdNodo,TipoRemove,IdRemove), 
+		check_entity_change(IdNodo,TipoEntidad,IdEntidad,TipoRemove,IdRemove))->
+			(	
+				writeln('if1'),
+				retractall(at(IdNodo,TipoRemove,IdRemove)),
+				asserta(at(IdNodo,TipoEntidad,IdEntidad))
+			);
+	%Caso 2: si el At no esta en las creencias
+	(\+ at(IdNodo,TipoEntidad,IdEntidad)) ->
+	(
+	(TipoEntidad = agente -> 
+		retractall(at(_,agente,me)); 
+		true
+	),
 		asserta(at(IdNodo,TipoEntidad,IdEntidad))
+	); true
 	)
 ),
 %Procesar tiempo
@@ -61,3 +76,7 @@ forall(
 	-> retractall(direction(_)), asserta(direction(D))
 	; true
 ).
+
+check_entity_change(IdNodo,TipoEntidad,IdEntidad,TipoRemove,IdRemove):-
+	TipoEntidad \= TipoRemove,
+	TipoEntidad \= agente.

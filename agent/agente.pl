@@ -81,7 +81,43 @@ decide_action(Action, 'Quiero levantar una copa...'):-
     at(MyNode,copa,IdGold),
     node(MyNode, PosX, PosY, _, _),
     Action = levantar(IdGold, PosX, PosY),
-    %retractall(at(MyNode, _, IdGold)),
+    retractall(at(MyNode, _, IdGold)),
+	retractall(plandesplazamiento(_)).
+
+% Caso para levantar un cofre
+decide_action(Action, 'Quiero levantar un cofre...'):-
+	at(MyNode, agente, me),
+	at(MyNode, cofre, IdCofre),
+	node(MyNode, PosX, PosY, _, _),
+	Action = levantar(IdCofre, PosX, PosY),
+	retractall(at(MyNode, _, IdCofre)),
+	retractall(plandesplazamiento(_)).
+
+% Caso para levantar un diamante
+decide_action(Action, 'Quiero levantar un diamante...'):-
+	at(MyNode, agente, me),
+	at(MyNode, diamante, IdDiamante),
+	node(MyNode, PosX, PosY, _, _),
+	Action = levantar(IdDiamante, PosX, PosY),
+	retractall(at(MyNode, _, IdDiamante)),
+	retractall(plandesplazamiento(_)).
+
+% Caso para levantar un reloj(X)
+decide_action(Action, 'Quiero levantar un reloj...'):-
+	at(MyNode, agente, me),
+	at(MyNode, reloj(X), IdReloj),
+	node(MyNode, PosX, PosY, _, _),
+	Action = levantar(IdReloj, PosX, PosY),
+	retractall(at(MyNode, _, IdReloj)),
+	retractall(plandesplazamiento(_)).
+
+% Caso para levantar una poción
+decide_action(Action, 'Quiero levantar una pocion...'):-
+	at(MyNode, agente, me),
+	at(MyNode, pocion, IdPocion),
+	node(MyNode, PosX, PosY, _, _),
+	Action = levantar(IdPocion, PosX, PosY),
+	retractall(at(MyNode, _, IdPocion)),
 	retractall(plandesplazamiento(_)).
 
 % Si tengo un plan de movimientos, ejecuto la siguiente acción.
