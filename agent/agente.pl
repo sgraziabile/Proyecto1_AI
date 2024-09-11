@@ -78,20 +78,11 @@ run(Perc, Action, Text, Beliefs):-
 % Si estoy en la misma posición que una copa, intento levantarla.
 decide_action(Action, 'Quiero levantar una copa...'):-
     at(MyNode, agente, me),
-    at(MyNode, copa, IdGold),
+    at(MyNode,copa,IdGold),
     node(MyNode, PosX, PosY, _, _),
-    Action = levantar_tesoro(IdGold, PosX, PosY),
-    retractall(at(MyNode, _, IdGold)),
+    Action = levantar(IdGold, PosX, PosY),
+    %retractall(at(MyNode, _, IdGold)),
 	retractall(plandesplazamiento(_)).
-
-% Me muevo a una posición vecina seleccionada de manera aleatoria.
-decide_action(Action, 'Me muevo a la posicion de al lado...'):-
-	at(MyNode, agente, me),
-	node(MyNode, _, _, _, AdyList),
-	length(AdyList, LenAdyList), LenAdyList > 0,
-	random_member([IdAdyNode, _CostAdyNode], AdyList),
-	!,
-	Action = avanzar(IdAdyNode).
 
 % Si tengo un plan de movimientos, ejecuto la siguiente acción.
 decide_action(Action, 'Avanzar...'):-
@@ -143,5 +134,14 @@ obtenerMovimiento([X|Xs], X, Xs).
 busqueda_plan(Plan, Destino, Costo):-
  	retractall(plandesplazamiento(_)),
  	retractall(esMeta(_)),
- 	findall(Nodo, at(Nodo, copa, _), Metas), % nuevas metas
+ 	findall(Nodo,
+		( 
+		at(Nodo, copa, _);
+		at(Nodo, cofre, _);
+		at(Nodo, diamante, _);
+		at(Nodo, reloj(_), _);
+		at(Nodo, pocion, _)
+	),
+	Metas
+	), 								% nuevas metas
  	buscar_plan_desplazamiento(Metas, Plan, Destino, Costo). % implementado en module_path_finding

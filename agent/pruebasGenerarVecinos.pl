@@ -7,27 +7,27 @@
 %node(c,2,1,1,[[a,1]]).
 %node(e,1,2,1,[[a,1]]).
 
-node(a,0,0,1,[[b,1],[d,20],[e,1]]).
-node(b,1,0,1,[[a,1],[d,20],[e,1],[f,1],[g,20]]).
-node(c,2,0,50,[[b,1],[e,1],[f,1],[k,20],[j,1]]).
+node(a,0,0,1,[[b,1],[d,50],[e,1]]).
+node(b,1,0,1,[[a,1],[d,50],[e,1],[f,1],[g,50]]).
+node(c,2,0,50,[[b,1],[e,1],[f,1],[k,50],[j,1]]).
 node(j,3,0,50,[[c,20],[f,1],[k,20]]).
 node(d,0,1,1,[[a,1],[b,1],[e,1]]).
-node(e,1,1,1,[[a,1],[b,1],[c,20],[d,20],[f,1],[g,20],[h,1],[i,1]]).
-node(f,2,1,1,[[b,1],[c,20],[j,1],[e,1],[k,20],[h,1],[i,1],[l,1]]).
-node(k,3,1,50,[[c,20],[j,1],[f,1],[i,1],[c,20]]).
-node(g,0,2,50,[[20,1],[e,1],[h,1]]).
-node(h,1,2,1,[[d,20],[e,1],[g,20],[i,1]]).
-node(i,2,2,1,[[e,1],[f,1],[k,20],[h,1],[c,20]]).
-node(l,3,2,1,[[f,1],[k,20],[i,1]]).
+node(e,1,1,1,[[a,1],[b,1],[c,50],[d,50],[f,1],[g,50],[h,1],[i,1]]).
+node(f,2,1,1,[[b,1],[c,50],[j,1],[e,1],[k,50],[h,1],[i,1],[l,1]]).
+node(k,3,1,50,[[c,50],[j,1],[f,1],[i,1],[c,50]]).
+node(g,0,2,50,[[50,1],[e,1],[h,1]]).
+node(h,1,2,1,[[d,50],[e,1],[g,50],[i,1]]).
+node(i,2,2,1,[[e,1],[f,1],[k,50],[h,1],[c,50]]).
+node(l,3,2,1,[[f,1],[k,50],[i,1]]).
 
 
-generarVecinos([IdNodo, CostoActual], Vecinos):-
+generarVecinos([IdNodo,_], Vecinos):-
 	node(IdNodo, _, _, _, Conexiones),
 	findall(
-		[IdVecino, CostoTotal],
+		[IdVecino, CostoVecino],
 		(
-			member([IdVecino, CostoVecino], Conexiones),
-			CostoTotal is CostoActual + CostoVecino
+			member([IdVecino, CostoVecino], Conexiones)
+			%CostoTotal is CostoActual + CostoVecino
 		), 
 		Vecinos 
 	).
@@ -42,15 +42,13 @@ generarVecinos([IdNodo, CostoActual], Vecinos):-
     ),
     min_list(ListaHeuristicas, MenorH).
 
-  eliminar(_,[],[]).
-  eliminar([X|Xs],X,Xs).
-  eliminar([Y|Ys],X,[Y|Zs]):-eliminar(Ys,X,Zs).
 
   print_list([]).
   print_list([X|Xs]):-
     write(X), nl,
     print_list(Xs).
 
+  agregar(Frontera, [], Frontera,_, _, _):- !.
   agregar(Frontera, Vecinos, NuevaFrontera,Visitados, Padre, Metas):-
     Padre = [IdPadre, CostoPadre],
     calcular_menor_H(IdPadre, Metas, HPadre),
