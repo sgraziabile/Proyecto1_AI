@@ -49,7 +49,6 @@ forall(
 	(	at(IdNodo,TipoRemove,IdRemove), 
 		check_entity_change(IdNodo,TipoEntidad,IdEntidad,TipoRemove,IdRemove))->
 			(	
-				writeln('if1'),
 				retractall(at(IdNodo,TipoRemove,IdRemove)),
 				asserta(at(IdNodo,TipoEntidad,IdEntidad))
 			);
