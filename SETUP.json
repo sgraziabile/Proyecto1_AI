@@ -2,7 +2,7 @@
     "tiempo": 120,
     "player_init_pos": [10, 10],
     "rango": 8,
-    "cantidad_premios": 20,
-    "cantidad_pociones": 10,
-    "cantidad_relojes": 15
+    "cantidad_premios": 40,
+    "cantidad_pociones": 5,
+    "cantidad_relojes": 10
 }

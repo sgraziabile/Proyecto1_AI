@@ -38,7 +38,6 @@ seleccionar(Nodo, [Nodo|RestoLista], RestoLista).
 %
 encontrarCamino(Nodo, []):- raiz(Nodo), !.
 encontrarCamino(Nodo, [P|Camino]):-
-	write('Encontrando Camino'),
 	padre(Nodo, P),
 	encontrarCamino(P, Camino).
 
@@ -62,8 +61,6 @@ crearPlan(Camino, Plan):-
 % representan estados alcanzables desde el estado de Nodo
 % aplicando alguno de los operadores disponibles. 
 %
-
-
 generarVecinos([IdNodo,_], Vecinos):-
 	node(IdNodo, _, _, _, Conexiones),
 	findall(
@@ -84,7 +81,7 @@ compararH([_,_,H1], [_,_,H2], Result):-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %ordenarPorH(+Lista, -ListaOrdenada)
 %
-% Ordena la lista de nodos por el valor de la heurística.
+% Ordena la lista de nodos de menor a mayor por el valor de la heurística.
 %
 ordenarPorH([], []).
 ordenarPorH(VecinosConH, VecinosOrdenados):-
@@ -94,11 +91,6 @@ ordenarPorH(VecinosConH, VecinosOrdenados):-
 % agregar(+Frontera, +Vecinos, -NuevaFrontera, +NuevosVisitados, +Padre, +Metas)
 % Agrega los vecinos de Padre a la frontera, siguiendo el algoritmo A*
 %
-print_list([]).
-print_list([X|Xs]):-
-	write(X), nl,
-	print_list(Xs).
-
 agregar(Frontera, [], Frontera,_, _, _):- !.
 agregar(Frontera, Vecinos, NuevaFrontera, Visitados, Padre, Metas):-
 	Padre = [IdPadre, CostoPadre],
@@ -111,10 +103,9 @@ agregar(Frontera, Vecinos, NuevaFrontera, Visitados, Padre, Metas):-
 				member([Hijo,ViejoF], Frontera),
 				\+ member([Hijo,_], Visitados) ->
 				( 
-					%writeln('Front, NoVisitados'),
 					G is (CostoPadre - HPadre) + CostoHijo,      %g(n) = costo acumulado 
 					calcular_menor_H(Hijo, Metas, HMeta),        %calculo el menor H de los hijos
-					FTemp is G + HMeta + HPadre,                 %f(n) = g(n) + h(n) 
+					FTemp is G + HMeta,                 %f(n) = g(n) + h(n) 
 					FTemp < ViejoF -> (
 						F = FTemp,
 						retractall(padre(Hijo, _)),               %elimino la relacion padre(Hijo, _)
@@ -125,23 +116,21 @@ agregar(Frontera, Vecinos, NuevaFrontera, Visitados, Padre, Metas):-
 					\+ member([Hijo,_],Frontera), 
 					\+ member([Hijo,_], Visitados) ->             %si el hijo no esta en visitados
 					(
-						%writeln('NoFront, NoVisitados'),
 						G is (CostoPadre - HPadre) + CostoHijo,      %g(n) = costo acumulado  ES NECESARIO VOLVER A SUMAR?
 						calcular_menor_H(Hijo, Metas, HMeta),    %calculo el menor H de los hijos
-						F is G + HMeta + HPadre,                      %f(n) = g(n) + h(n)
+						F is G + HMeta,                      %f(n) = g(n) + h(n)
 						retractall(padre(Hijo, _)),               %elimino la relacion padre(Hijo, _)
 						assert(padre(Hijo, IdPadre))                %agrego la relacion padre(Hijo, Padre)
 					)
 					; 
 					\+ member([Hijo,_],Frontera),
 					member([Hijo,ViejoF], Visitados) -> (               %si el hijo esta en visitados
-						%writeln('NoFront, Visitados'),
 						G is (CostoPadre - HPadre) + CostoHijo,      %g(n) = costo acumulado 
 						calcular_menor_H(Hijo, Metas, HMeta),        %calculo el menor H de los hijos
-						FTemp is G + HMeta + HPadre,                 %f(n) = g(n) + h(n) 
+						FTemp is G + HMeta,                 %f(n) = g(n) + h(n) 
 						FTemp < ViejoF -> (
 							F = FTemp, 
-							delete(Visitados, [Hijo, _],VisitadosAux),    %agrego la relacion padre(Hijo, Padre)
+							delete(Visitados, [Hijo, _],VisitadosAux),    %elimino el hijo de visitados
 							retractall(padre(Hijo, _)),               %elimino la relacion padre(Hijo, _)
 							assert(padre(Hijo, IdPadre))                %agrego la relacion padre(Hijo, Padre)
 						); false
@@ -232,7 +221,6 @@ buscarEstrella(Frontera, Metas, C3, Costo, Destino):-
 buscar(Frontera, _, _M, Nodo):-
 	seleccionar([Nodo, _], Frontera, _),
 	esMeta(Nodo),
-	write('Llegue a la meta!'), nl,
 	!.
 
 buscar(Frontera, Visitados, Metas, MM):-
@@ -240,8 +228,6 @@ buscar(Frontera, Visitados, Metas, MM):-
 	generarVecinos(Nodo, Vecinos), % genera los vecinos del nodo - TO-DO
 	agregarAVisitados(Nodo, Visitados, NuevosVisitados), % agrega el nodo a lista de visitados
 	agregar(FronteraSinNodo, Vecinos, NuevaFrontera, NuevosVisitados, Nodo, Metas), % agrega vecinos a la frontera - TO-DO
-	write('Nueva frontera: '), nl,
-	print_list(NuevaFrontera),
 	buscar(NuevaFrontera, NuevosVisitados, Metas, MM). % continua la busqueda con la nueva frontera
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
@@ -283,3 +269,8 @@ distance([X1, Y1], [X2, Y2], Distance):-
 	DX is X2 - X1,
 	DY is Y2 - Y1,
 	Distance is sqrt(DX^2 + DY^2).
+
+print_list([]).
+print_list([X|Xs]):-
+	write(X), nl,
+	print_list(Xs).
